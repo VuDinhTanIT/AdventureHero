@@ -18,14 +18,17 @@ public class Finish : MonoBehaviour
     {
         if (collision.gameObject.name == "Player" && !levelCompleted)
         {
+            // Debug.Log("Finish lv: " + collision.gameObject.name);
             finishSound.Play();
-            levelCompleted = true;
+            // levelCompleted = true;
+            // GetComponent<PlayerLife>().Win();
             Invoke("CompleteLevel", 2f);
         }
     }
 
     private void CompleteLevel()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        Debug.Log("Level Completed ");
+        // SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

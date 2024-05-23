@@ -14,12 +14,14 @@ public class PlayerMovement : MonoBehaviour
     private float dirX = 0f;
     [SerializeField] private float moveSpeed = 7f;
     [SerializeField] private float jumpForce = 14f;
-
+    private bool isJumpPressed = false; // Biến kiểm tra xem nút nhảy đã được nhấn hay chưa
     private enum MovementState { idle, running, jumping, falling }
 
     [SerializeField] private AudioSource jumpSoundEffect;
+    private float lastGroundedY;
 
     // Start is called before the first frame update
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -29,19 +31,39 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void Update()
+  private void Update()
+{
+    dirX = Input.GetAxisRaw("Horizontal");
+    rb.velocity = new Vector2(dirX * moveSpeed, rb.velocity.y);
+    if (Input.GetButtonDown("Jump"))
     {
-        dirX = Input.GetAxisRaw("Horizontal");
-        rb.velocity = new Vector2(dirX * moveSpeed, rb.velocity.y);
-
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        if (IsGrounded()) // Kiểm tra nếu nhân vật đang ở trạng thái tiếp xúc với mặt đất
         {
-            jumpSoundEffect.Play();
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            Jump(jumpForce);
+            isJumpPressed = true;
         }
-
-        UpdateAnimationState();
+        else if (!IsJumping() && isJumpPressed) 
+        {
+            float distance = rb.position.y - lastGroundedY; // Tính khoảng cách di chuyển theo trục y từ lần nhảy trước đến lần nhảy hiện tại
+            Jump(jumpForce + distance);
+            isJumpPressed = false;
+        }
     }
+
+    UpdateAnimationState();
+}
+
+private void Jump(float jumpForce)
+{
+    jumpSoundEffect.Play();
+    rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+    lastGroundedY = rb.position.y;
+}
+
+private bool IsJumping()
+{
+    return !IsGrounded() && rb.velocity.y > -4;
+}
 
     private void UpdateAnimationState()
     {
